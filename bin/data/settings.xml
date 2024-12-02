@@ -13,6 +13,7 @@
     <height>480</height>
     <debug>0</debug>
     <!-- * -->
+    <cam_usb_id>1</cam_usb_id>
     <rpi_cam_version>2</rpi_cam_version>
     <still_compression>100</still_compression>
     <!-- * -->

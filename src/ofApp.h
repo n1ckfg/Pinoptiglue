@@ -73,6 +73,8 @@ class ofApp : public ofBaseApp {
 		ofBuffer contourPointsBuffer;
 
 		ofxCvPiCam cam;
+		ofVideoGrabber camUsb;
+		int camUsbId;
 		cv::Mat frame, frameProcessed;
 		ofImage gray;
 		ofImage grayThumbnail;
