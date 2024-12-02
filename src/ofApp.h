@@ -72,6 +72,11 @@ class ofApp : public ofBaseApp {
 		ofBuffer contourColorBuffer;
 		ofBuffer contourPointsBuffer;
 
+		bool usePiCam;
+		bool useUsbCam;
+		bool useMjpegIn;
+		bool newFrameToProcess;
+
 		ofxCvPiCam cam;
 		ofVideoGrabber camUsb;
 		int camUsbId;
@@ -111,5 +116,6 @@ class ofApp : public ofBaseApp {
 		int smooth;
 			
 		ofxCv::TrackingColorMode trackingColorMode; // RGB, HSV, H, HS; default RGB
+		void grabberSetup(int _id, int _fps, int _width, int _height);
 
 };

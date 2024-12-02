@@ -48,6 +48,11 @@ void ofApp::setup() {
     wsPort = settings.getValue("settings:ws_port", 7112);
     postPort = settings.getValue("settings:post_port", 7113);
 
+    usePiCam = (bool) settings.getValue("settings:use_pi_cam", 1);
+    useUsbCam = (bool) settings.getValue("settings:use_usb_cam", 0);
+    useMjpegIn = (bool) settings.getValue("settings:use_mjpeg_in", 0);
+
+    camUsbId = settings.getValue("settings:cam_usb_id", 1);
     rpiCamVersion = settings.getValue("settings:rpi_cam_version", 1);
     stillCompression = settings.getValue("settings:still_compression", 100);
 
@@ -60,26 +65,30 @@ void ofApp::setup() {
         grayThumbnail.allocate(width, height, OF_IMAGE_GRAYSCALE);        
     }
     
-    cam.setup(width, height, camFramerate, videoColor); // color/gray;
+    if (usePiCam) {
+        cam.setup(width, height, camFramerate, videoColor); // color/gray;
 
-    camRotation = settings.getValue("settings:cam_rotation", 0); 
-    camSharpness = settings.getValue("settings:sharpness", 0); 
-    camContrast = settings.getValue("settings:contrast", 0); 
-    camBrightness = settings.getValue("settings:brightness", 50); 
-    camIso = settings.getValue("settings:iso", 300); 
-    camExposureMode = settings.getValue("settings:exposure_mode", 0); 
-    camExposureCompensation = settings.getValue("settings:exposure_compensation", 0); 
-    camShutterSpeed = settings.getValue("settings:shutter_speed", 0);
+        camRotation = settings.getValue("settings:cam_rotation", 0); 
+        camSharpness = settings.getValue("settings:sharpness", 0); 
+        camContrast = settings.getValue("settings:contrast", 0); 
+        camBrightness = settings.getValue("settings:brightness", 50); 
+        camIso = settings.getValue("settings:iso", 300); 
+        camExposureMode = settings.getValue("settings:exposure_mode", 0); 
+        camExposureCompensation = settings.getValue("settings:exposure_compensation", 0); 
+        camShutterSpeed = settings.getValue("settings:shutter_speed", 0);
 
-    cam.setRotation(camRotation);
-    cam.setSharpness(camSharpness);
-    cam.setContrast(camContrast);
-    cam.setBrightness(camBrightness);
-    cam.setISO(camIso);
-    cam.setExposureMode((MMAL_PARAM_EXPOSUREMODE_T) camExposureMode);
-    cam.setExposureCompensation(camExposureCompensation);
-    cam.setShutterSpeed(camShutterSpeed);
-    //cam.setFrameRate // not implemented in ofxCvPiCam 
+        cam.setRotation(camRotation);
+        cam.setSharpness(camSharpness);
+        cam.setContrast(camContrast);
+        cam.setBrightness(camBrightness);
+        cam.setISO(camIso);
+        cam.setExposureMode((MMAL_PARAM_EXPOSUREMODE_T) camExposureMode);
+        cam.setExposureCompensation(camExposureCompensation);
+        cam.setShutterSpeed(camShutterSpeed);
+        //cam.setFrameRate // not implemented in ofxCvPiCam 
+    }else if (useUsbCam) {
+        grabberSetup(camUsbId, camFramerate, width, height);   
+    }
 
     // ~ ~ ~   get a persistent name for this computer   ~ ~ ~
     // a randomly generated id
@@ -120,20 +129,52 @@ void ofApp::setup() {
     setupOscSender(sender, oscHost, oscPort);
 }
 
+void ofApp::grabberSetup(int _id, int _fps, int _width, int _height) {
+    //get back a list of devices.
+    vector<ofVideoDevice> devices = camUsb.listDevices();
+
+    for(size_t i = 0; i < devices.size(); i++){
+        if(devices[i].bAvailable){
+            //log the device
+            ofLogNotice() << devices[i].id << ": " << devices[i].deviceName;
+        }else{
+            //log the device and note it as unavailable
+            ofLogNotice() << devices[i].id << ": " << devices[i].deviceName << " - unavailable ";
+        }
+    }
+
+    camUsb.setDeviceID(_id);
+    camUsb.setDesiredFrameRate(_fps);
+    camUsb.initGrabber(_width, _height);
+}
+
 //--------------------------------------------------------------
 void ofApp::update() {
     timestamp = getTimestamp();
+    newFrameToProcess = false;
     
-    frame = cam.grab();
+    if (usePiCam && !useUsbCam) {
+        frame = cam.grab();
+        if (!frame.empty()) {
+            toOf(frame, gray.getPixelsRef());           
+            newFrameToProcess = true;
+        }
+    } else if (useUsbCam) {
+        camUsb.update();
+        if (camUsb.isFrameNew()) {           
+            ofPixels tempPixels = camUsb.getPixelsRef();
+            gray.setFromPixels(tempPixels);
+            frame = toCv(gray);
+            newFrameToProcess = true;
+        }
+    }
 
-    if (!frame.empty()) {
-        toOf(frame, gray.getPixelsRef());
-
+    if (newFrameToProcess) {
         if (sendMjpeg) streamServer.send(gray.getPixels());
         
         if (syncVideo) {
-	    grayThumbnail.setFromPixels(gray.getPixels());
-	    grayThumbnail.resize(thumbWidth, thumbHeight);
+            grayThumbnail.setFromPixels(gray.getPixels());
+            grayThumbnail.resize(thumbWidth, thumbHeight);
             imageToBuffer(grayThumbnail, videoBuffer, syncVideoQuality);
        	}
     }
@@ -143,7 +184,7 @@ void ofApp::update() {
 void ofApp::draw() {
     ofBackground(0);
 
-    if(!frame.empty()) {
+    if(newFrameToProcess) {
         if (debug) {
             if (!blobs && !contours) {
                 drawMat(frame, 0, 0);
