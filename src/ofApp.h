@@ -8,6 +8,7 @@
 #include "ofxHTTP.h"
 #include "ofxJSONElement.h"
 #include "ofxCrypto.h"
+#include "IPVideoGrabber.h"
 
 #define NUM_MESSAGES 30 // how many past ws messages we want to keep
 
@@ -82,6 +83,9 @@ class ofApp : public ofBaseApp {
 
 		ofxCvPiCam cam;
 		ofVideoGrabber camUsb;
+		ofx::Video::IPVideoGrabber camIp;
+		
+		string mjpegUrl;
 		int camUsbId;
 		cv::Mat frame, frameProcessed;
 		ofImage gray;

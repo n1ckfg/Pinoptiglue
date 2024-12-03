@@ -58,7 +58,17 @@ void ofApp::setup() {
     
     useMjpegIn = (bool) settings.getValue("settings:use_mjpeg_in", 0);
     mjpegOutDirect = (bool) settings.getValue("settings:mjpeg_out_direct", 1);
-          
+    mjpegUrl = settings.getValue("settings:mjpeg_url", "http://nfg-rpi-3-4.local:7111/ipvideo");
+
+    if (usePiCam && useUsbCam) {
+        usePiCam = false;
+    }
+    
+    if (useMjpegIn) {
+        usePiCam = false;
+        useUsbCam = false;
+    }
+    
     // camera
     if (videoColor) {
         gray.allocate(width, height, OF_IMAGE_COLOR);
@@ -89,10 +99,13 @@ void ofApp::setup() {
         cam.setExposureCompensation(camExposureCompensation);
         cam.setShutterSpeed(camShutterSpeed);
         //cam.setFrameRate // not implemented in ofxCvPiCam 
-    }else if (useUsbCam) {
+    } else if (useUsbCam) {
         grabberSetup(camUsbId, camFramerate, width, height);   
+    } else if (useMjpegIn) {
+        camIp.setURI(mjpegUrl);
+        camIp.connect();
     }
-
+    
     // ~ ~ ~   get a persistent name for this computer   ~ ~ ~
     // a randomly generated id
     sessionId = getSessionId();
@@ -164,7 +177,7 @@ void ofApp::update() {
     timestamp = getTimestamp();
     newFrameToProcess = false;
     
-    if (usePiCam && !useUsbCam) {
+    if (usePiCam) {
         frame = cam.grab();
         if (!frame.empty()) {
             toOf(frame, gray.getPixelsRef());           
@@ -173,8 +186,16 @@ void ofApp::update() {
     } else if (useUsbCam) {
         camUsb.update();
         if (camUsb.isFrameNew()) {           
-            ofPixels tempPixels = camUsb.getPixelsRef();
-            gray.setFromPixels(tempPixels);
+            //ofPixels tempPixels = camUsb.getPixelsRef();
+            gray.setFromPixels(camUsb.getPixelsRef());//tempPixels);
+            frame = toCv(gray);
+            newFrameToProcess = true;
+        }
+    } else if (useMjpegIn) {
+        camIp.update();
+        if (camIp.isFrameNew()) {
+            //ofPixels tempPixels = camIp.getPixels();
+            gray.setFromPixels(camIp.getPixels());//tempPixels);
             frame = toCv(gray);
             newFrameToProcess = true;
         }
