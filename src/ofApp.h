@@ -29,7 +29,6 @@ class ofApp : public ofBaseApp {
 		ofFile file;
 		ofxXmlSettings settings;
 
-		ofFbo fbo;
 		ofPixels pixels;
 		int rpiCamVersion; // 0 for not an RPi cam, 1, 2, or 3
 		string lastPhotoTakenName;
@@ -71,10 +70,14 @@ class ofApp : public ofBaseApp {
 		ofBuffer photoBuffer;
 		ofBuffer contourColorBuffer;
 		ofBuffer contourPointsBuffer;
-
+	
+		ofFbo screenFbo;
+		ofPixels screenPixels;
+		
 		bool usePiCam;
 		bool useUsbCam;
 		bool useMjpegIn;
+		bool mjpegOutDirect;
 		bool newFrameToProcess;
 
 		ofxCvPiCam cam;

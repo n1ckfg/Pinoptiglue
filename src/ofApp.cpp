@@ -49,13 +49,16 @@ void ofApp::setup() {
     postPort = settings.getValue("settings:post_port", 7113);
 
     usePiCam = (bool) settings.getValue("settings:use_pi_cam", 1);
-    useUsbCam = (bool) settings.getValue("settings:use_usb_cam", 0);
-    useMjpegIn = (bool) settings.getValue("settings:use_mjpeg_in", 0);
-
-    camUsbId = settings.getValue("settings:cam_usb_id", 1);
-    rpiCamVersion = settings.getValue("settings:rpi_cam_version", 1);
+    rpiCamVersion = settings.getValue("settings:rpi_cam_version", 2);
     stillCompression = settings.getValue("settings:still_compression", 100);
-
+    
+    useUsbCam = (bool) settings.getValue("settings:use_usb_cam", 0);
+    camUsbId = settings.getValue("settings:cam_usb_id", 0);
+    if (usePiCam && useUsbCam) usePiCam = false;
+    
+    useMjpegIn = (bool) settings.getValue("settings:use_mjpeg_in", 0);
+    mjpegOutDirect = (bool) settings.getValue("settings:mjpeg_out_direct", 1);
+          
     // camera
     if (videoColor) {
         gray.allocate(width, height, OF_IMAGE_COLOR);
@@ -98,7 +101,9 @@ void ofApp::setup() {
     ofSystem("cp /etc/hostname " + ofToDataPath("DocumentRoot/js/"));
     hostName = getHostName();
     
-    fbo.allocate(width, height, GL_RGBA);
+    screenFbo.allocate(width, height, GL_RGBA);
+    screenPixels.allocate(width, height, OF_IMAGE_COLOR);
+    //fbo.allocate(width, height, GL_RGBA);
     pixels.allocate(width, height, OF_IMAGE_COLOR);
         
     thresholdValue = settings.getValue("settings:threshold", 127); 
@@ -127,6 +132,12 @@ void ofApp::setup() {
     setupWsServer(this, wsServer, wsPort);
 
     setupOscSender(sender, oscHost, oscPort);
+
+    std::cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
+    std::cout << "Using Pi cam: " << usePiCam << " | version: " << rpiCamVersion << endl;
+    std::cout << "Using USB cam: " << useUsbCam << " | id: " << camUsbId << endl;
+    std::cout << "Using MJPEG in: " << useMjpegIn << " | MJPEG send mode: " << mjpegOutDirect << endl;
+    std::cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
 }
 
 void ofApp::grabberSetup(int _id, int _fps, int _width, int _height) {
@@ -169,22 +180,27 @@ void ofApp::update() {
         }
     }
 
-    if (newFrameToProcess) {
+    if (newFrameToProcess && mjpegOutDirect) {
+        //std::cout << ("Sending direct") << endl;
         if (sendMjpeg) streamServer.send(gray.getPixels());
         
         if (syncVideo) {
             grayThumbnail.setFromPixels(gray.getPixels());
             grayThumbnail.resize(thumbWidth, thumbHeight);
             imageToBuffer(grayThumbnail, videoBuffer, syncVideoQuality);
-       	}
+
+            if (sendOsc) sendOscVideo(sender, hostName, sessionId, videoBuffer, timestamp);
+            if (sendWs) sendWsVideo(wsServer, hostName, sessionId, videoBuffer, timestamp);
+        }
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    ofBackground(0);
-
     if(newFrameToProcess) {
+        screenFbo.begin();
+        ofBackground(0);
+        
         if (debug) {
             if (!blobs && !contours) {
                 drawMat(frame, 0, 0);
@@ -192,11 +208,6 @@ void ofApp::draw() {
                 drawMat(frameProcessed, 0, 0);
             }
         }
-
-        if (syncVideo) {
-            if (sendOsc) sendOscVideo(sender, hostName, sessionId, videoBuffer, timestamp);
-            if (sendWs) sendWsVideo(wsServer, hostName, sessionId, videoBuffer, timestamp);
-        } 
 
         if (blobs) {
             if (debug) {
@@ -305,9 +316,29 @@ void ofApp::draw() {
             if (sendOsc) sendOscPixel(sender, hostName, sessionId, maxBrightnessX, maxBrightnessY, timestamp);
             if (sendWs) sendWsPixel(wsServer, hostName, sessionId, maxBrightnessX, maxBrightnessY, timestamp);
         }
-    }
+        
+        screenFbo.end();
 
+        if (!mjpegOutDirect && sendMjpeg || syncVideo) {           
+            //std::cout << ("Sending fbo") << endl;
+
+            screenFbo.readToPixels(screenPixels);
+            if (sendMjpeg) streamServer.send(screenPixels);
+            
+            if (syncVideo) {
+                grayThumbnail.setFromPixels(screenPixels);
+                grayThumbnail.resize(thumbWidth, thumbHeight);
+                imageToBuffer(grayThumbnail, videoBuffer, syncVideoQuality);
+
+                if (sendOsc) sendOscVideo(sender, hostName, sessionId, videoBuffer, timestamp);
+                if (sendWs) sendWsVideo(wsServer, hostName, sessionId, videoBuffer, timestamp);            
+            }
+        }
+    }
+       
     if (debug) {
+        screenFbo.draw(0,0);
+
         stringstream info;
         info << cam.width << "x" << cam.height << " @ "<< ofGetFrameRate() <<"fps"<< "\n";
         ofDrawBitmapStringHighlight(info.str(), 10, 10, ofColor::black, ofColor::yellow);
