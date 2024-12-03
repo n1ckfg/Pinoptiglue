@@ -87,11 +87,7 @@ void ofApp::setup() {
         mjpegInTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);           
     }
     
-    camMode = CamMode::None;
-
     if (usePiCam) {
-        camMode = CamMode::PiOnly;
-
         cam.setup(width, height, camFramerate, videoColor); // color/gray;
 
         camRotation = settings.getValue("settings:cam_rotation", 0); 
@@ -114,25 +110,23 @@ void ofApp::setup() {
         //cam.setFrameRate // not implemented in ofxCvPiCam 
     }
     
-    if (useUsbCam) {
-        if (camMode == CamMode::PiOnly) {
-            camMode = CamMode::Combo;
-        } else {
-            camMode = CamMode::UsbOnly;
-        }
-        
+    if (useUsbCam) {       
         grabberSetup(camUsbId, camFramerate, width, height);   
     }
     
-    if (useMjpegIn) {
-        if (camMode == CamMode::PiOnly || camMode == CamMode::UsbOnly) {
-            camMode = CamMode::Combo;
-        } else {
-            camMode = CamMode::MjpegOnly;
-        }
-        
+    if (useMjpegIn) {       
         camIp.setURI(mjpegUrl);
         camIp.connect();
+    }
+    
+    if (usePiCam && !useUsbCam && !useMjpegIn) {
+        camMode = CamMode::PiOnly;
+    } else if (!usePiCam && useUsbCam && !useMjpegIn) {
+        camMode = CamMode::UsbOnly;
+    } else if (!usePiCam && !useUsbCam && useMjpegIn) {
+        camMode = CamMode::MjpegOnly;
+    } else {
+        camMode = CamMode::Combo;
     }
     
     // ~ ~ ~   get a persistent name for this computer   ~ ~ ~
@@ -149,7 +143,7 @@ void ofApp::setup() {
     screenFbo.allocate(width, height, GL_RGBA);
     screenPixels.allocate(width, height, OF_IMAGE_COLOR);
     //fbo.allocate(width, height, GL_RGBA);
-    pixels.allocate(width, height, OF_IMAGE_COLOR);
+    //pixels.allocate(width, height, OF_IMAGE_COLOR);
         
     thresholdValue = settings.getValue("settings:threshold", 127); 
     contourThreshold = 2.0;
@@ -250,7 +244,7 @@ void ofApp::update() {
     if (newFrameToProcess) {
         if (camMode == CamMode::Combo) {
             targetBlendFbo.begin();
-             ofEnableBlendMode(OF_BLENDMODE_ALPHA); 
+            ofEnableBlendMode(OF_BLENDMODE_ALPHA); 
 
             if (comboBlendMode == OF_BLENDMODE_SUBTRACT || comboBlendMode == OF_BLENDMODE_MULTIPLY) {
                 ofBackground(255);

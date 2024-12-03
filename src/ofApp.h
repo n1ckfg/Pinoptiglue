@@ -30,7 +30,7 @@ class ofApp : public ofBaseApp {
 		ofFile file;
 		ofxXmlSettings settings;
 
-		ofPixels pixels;
+		//ofPixels pixels;
 		int rpiCamVersion; // 0 for not an RPi cam, 1, 2, or 3
 		string lastPhotoTakenName;
 		int stillCompression;
@@ -136,8 +136,7 @@ class ofApp : public ofBaseApp {
 			PiOnly,
 			UsbOnly,
 			MjpegOnly,
-			Combo,
-			None
+			Combo
 		};
 		
 		CamMode camMode;
