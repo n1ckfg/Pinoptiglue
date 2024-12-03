@@ -92,6 +92,8 @@ class ofApp : public ofBaseApp {
 		ofFbo targetBlendFbo;
 		ofPixels targetBlendPixels;
 		ofImage piCamTarget, camUsbTarget, mjpegInTarget;
+		string comboBlend;
+		ofBlendMode comboBlendMode;
 		
 		ofImage gray;
 		ofImage grayThumbnail;
@@ -129,5 +131,15 @@ class ofApp : public ofBaseApp {
 			
 		ofxCv::TrackingColorMode trackingColorMode; // RGB, HSV, H, HS; default RGB
 		void grabberSetup(int _id, int _fps, int _width, int _height);
-
+	
+		enum class CamMode {
+			PiOnly,
+			UsbOnly,
+			MjpegOnly,
+			Combo,
+			None
+		};
+		
+		CamMode camMode;
+	
 };

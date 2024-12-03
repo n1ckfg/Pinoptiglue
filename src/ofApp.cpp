@@ -59,16 +59,18 @@ void ofApp::setup() {
     mjpegOutDirect = (bool) settings.getValue("settings:mjpeg_out_direct", 1);
     mjpegUrl = settings.getValue("settings:mjpeg_url", "http://nfg-rpi-3-4.local:7111/ipvideo");
 
-    /*
-    if (usePiCam && useUsbCam) {
-        usePiCam = false;
+    // OF_BLENDMODE_DISABLED, OF_BLENDMODE_ALPHA, OF_BLENDMODE_ADD, 
+    // OF_BLENDMODE_SUBTRACT, OF_BLENDMODE_MULTIPLY, OF_BLENDMODE_SCREEN
+    comboBlend = settings.getValue("settings:combo_blend", "screen");
+    if (comboBlend == "add") {
+        comboBlendMode = OF_BLENDMODE_ADD;
+    } else if (comboBlend == "subtract") {
+        comboBlendMode = OF_BLENDMODE_SUBTRACT;
+    } else if (comboBlend == "multiply") {
+        comboBlendMode = OF_BLENDMODE_MULTIPLY;
+    } else {
+        comboBlendMode = OF_BLENDMODE_SCREEN;
     }
-    
-    if (useMjpegIn) {
-        usePiCam = false;
-        useUsbCam = false;
-    }
-    */ 
     
     // camera
     if (videoColor) {
@@ -85,7 +87,11 @@ void ofApp::setup() {
         mjpegInTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);           
     }
     
+    camMode = CamMode::None;
+
     if (usePiCam) {
+        camMode = CamMode::PiOnly;
+
         cam.setup(width, height, camFramerate, videoColor); // color/gray;
 
         camRotation = settings.getValue("settings:cam_rotation", 0); 
@@ -109,10 +115,22 @@ void ofApp::setup() {
     }
     
     if (useUsbCam) {
+        if (camMode == CamMode::PiOnly) {
+            camMode = CamMode::Combo;
+        } else {
+            camMode = CamMode::UsbOnly;
+        }
+        
         grabberSetup(camUsbId, camFramerate, width, height);   
     }
     
     if (useMjpegIn) {
+        if (camMode == CamMode::PiOnly || camMode == CamMode::UsbOnly) {
+            camMode = CamMode::Combo;
+        } else {
+            camMode = CamMode::MjpegOnly;
+        }
+        
         camIp.setURI(mjpegUrl);
         camIp.connect();
     }
@@ -160,11 +178,12 @@ void ofApp::setup() {
 
     setupOscSender(sender, oscHost, oscPort);
 
-    std::cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
-    std::cout << "Using Pi cam: " << usePiCam << " | version: " << rpiCamVersion << endl;
-    std::cout << "Using USB cam: " << useUsbCam << " | id: " << camUsbId << endl;
-    std::cout << "Using MJPEG in: " << useMjpegIn << " | MJPEG send mode: " << mjpegOutDirect << endl;
-    std::cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
+    cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
+    cout << "Using Pi cam: " << usePiCam << " | version: " << rpiCamVersion << endl;
+    cout << "Using USB cam: " << useUsbCam << " | id: " << camUsbId << endl;
+    cout << "Using MJPEG in: " << useMjpegIn << " | MJPEG send mode: " << mjpegOutDirect << endl;
+    cout << "Combo blend mode: " << comboBlend << endl;
+    cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
 }
 
 void ofApp::grabberSetup(int _id, int _fps, int _width, int _height) {
@@ -189,22 +208,29 @@ void ofApp::grabberSetup(int _id, int _fps, int _width, int _height) {
 //--------------------------------------------------------------
 void ofApp::update() {
     timestamp = getTimestamp();
-    newFrameToProcess = true;
+    newFrameToProcess = false;
     ofBackground(0);
        
-    //if (usePiCam) {
+    if (usePiCam) {
         frame_first = cam.grab();
         if (!frame_first.empty()) {
-            toOf(frame_first, piCamTarget.getPixelsRef());
+            if (camMode == CamMode::PiOnly) {
+                toOf(frame_first, gray.getPixelsRef());
+            } else {
+                toOf(frame_first, piCamTarget.getPixelsRef());                
+            }
             newFrameToProcess = true;
         }
-    //} 
+    } 
     
     if (useUsbCam) {
         camUsb.update();
-        if (camUsb.isFrameNew()) {           
-            //ofPixels tempPixels = camUsb.getPixelsRef();
-            camUsbTarget.setFromPixels(camUsb.getPixelsRef());//tempPixels);
+        if (camUsb.isFrameNew()) {  
+            if (camMode == CamMode::UsbOnly) {
+                gray.setFromPixels(camUsb.getPixelsRef());
+            } else {
+                camUsbTarget.setFromPixels(camUsb.getPixelsRef());                
+            }                     
             newFrameToProcess = true;
         }
     } 
@@ -212,25 +238,36 @@ void ofApp::update() {
     if (useMjpegIn) {
         camIp.update();
         if (camIp.isFrameNew()) {
-            //ofPixels tempPixels = camIp.getPixels();
-            mjpegInTarget.setFromPixels(camIp.getPixels());//tempPixels);
+            if (camMode == CamMode::MjpegOnly) {
+                gray.setFromPixels(camIp.getPixels());;
+            } else {
+                mjpegInTarget.setFromPixels(camIp.getPixels());;               
+            }  
             newFrameToProcess = true;
         }
     }
     
     if (newFrameToProcess) {
-        targetBlendFbo.begin();
-        // OF_BLENDMODE_DISABLED, OF_BLENDMODE_ALPHA, OF_BLENDMODE_ADD, 
-        // OF_BLENDMODE_SUBTRACT, OF_BLENDMODE_MULTIPLY, OF_BLENDMODE_SCREEN
-        ofBackground(0);
-        ofEnableBlendMode(OF_BLENDMODE_SCREEN); 
-        if (usePiCam) piCamTarget.draw(0,0);  
-        if (useUsbCam) camUsbTarget.draw(0,0);
-        if (useMjpegIn) mjpegInTarget.draw(0,0);
-        targetBlendFbo.end();
+        if (camMode == CamMode::Combo) {
+            targetBlendFbo.begin();
+             ofEnableBlendMode(OF_BLENDMODE_ALPHA); 
 
-        targetBlendFbo.readToPixels(targetBlendPixels);
-        gray.setFromPixels(targetBlendPixels);
+            if (comboBlendMode == OF_BLENDMODE_SUBTRACT || comboBlendMode == OF_BLENDMODE_MULTIPLY) {
+                ofBackground(255);
+            } else {
+                ofBackground(0);
+            }
+            
+            ofEnableBlendMode(comboBlendMode); 
+            if (usePiCam) piCamTarget.draw(0,0);  
+            if (useUsbCam) camUsbTarget.draw(0,0);
+            if (useMjpegIn) mjpegInTarget.draw(0,0);
+            targetBlendFbo.end();
+
+            targetBlendFbo.readToPixels(targetBlendPixels);
+            gray.setFromPixels(targetBlendPixels);
+        }
+        
         frame = toCv(gray);
 
         if (mjpegOutDirect) {

@@ -17,6 +17,8 @@
     <use_usb_cam>1</use_usb_cam>
     <use_mjpeg_in>1</use_mjpeg_in>
     <mjpeg_url>http://nfg-rpi-3-4.local:7111/ipvideo</mjpeg_url>
+    <!-- add, subtract, multiply, screen -->
+    <combo_blend>multiply</combo_blend>
     <!-- * -->
     <cam_usb_id>0</cam_usb_id>
     <rpi_cam_version>2</rpi_cam_version>
