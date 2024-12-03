@@ -54,12 +54,12 @@ void ofApp::setup() {
     
     useUsbCam = (bool) settings.getValue("settings:use_usb_cam", 0);
     camUsbId = settings.getValue("settings:cam_usb_id", 0);
-    if (usePiCam && useUsbCam) usePiCam = false;
     
     useMjpegIn = (bool) settings.getValue("settings:use_mjpeg_in", 0);
     mjpegOutDirect = (bool) settings.getValue("settings:mjpeg_out_direct", 1);
     mjpegUrl = settings.getValue("settings:mjpeg_url", "http://nfg-rpi-3-4.local:7111/ipvideo");
 
+    /*
     if (usePiCam && useUsbCam) {
         usePiCam = false;
     }
@@ -68,14 +68,21 @@ void ofApp::setup() {
         usePiCam = false;
         useUsbCam = false;
     }
+    */ 
     
     // camera
     if (videoColor) {
         gray.allocate(width, height, OF_IMAGE_COLOR);
         grayThumbnail.allocate(width, height, OF_IMAGE_COLOR);
+		piCamTarget.allocate(width, height, OF_IMAGE_COLOR);
+        camUsbTarget.allocate(width, height, OF_IMAGE_COLOR);
+        mjpegInTarget.allocate(width, height, OF_IMAGE_COLOR);
     } else {
         gray.allocate(width, height, OF_IMAGE_GRAYSCALE);        
-        grayThumbnail.allocate(width, height, OF_IMAGE_GRAYSCALE);        
+        grayThumbnail.allocate(width, height, OF_IMAGE_GRAYSCALE);     
+		piCamTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);
+        camUsbTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);
+        mjpegInTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);           
     }
     
     if (usePiCam) {
@@ -99,9 +106,13 @@ void ofApp::setup() {
         cam.setExposureCompensation(camExposureCompensation);
         cam.setShutterSpeed(camShutterSpeed);
         //cam.setFrameRate // not implemented in ofxCvPiCam 
-    } else if (useUsbCam) {
+    }
+    
+    if (useUsbCam) {
         grabberSetup(camUsbId, camFramerate, width, height);   
-    } else if (useMjpegIn) {
+    }
+    
+    if (useMjpegIn) {
         camIp.setURI(mjpegUrl);
         camIp.connect();
     }
@@ -114,6 +125,9 @@ void ofApp::setup() {
     ofSystem("cp /etc/hostname " + ofToDataPath("DocumentRoot/js/"));
     hostName = getHostName();
     
+    targetBlendFbo.allocate(width, height, GL_RGBA);
+    targetBlendPixels.allocate(width, height, OF_IMAGE_COLOR);
+
     screenFbo.allocate(width, height, GL_RGBA);
     screenPixels.allocate(width, height, OF_IMAGE_COLOR);
     //fbo.allocate(width, height, GL_RGBA);
@@ -175,43 +189,62 @@ void ofApp::grabberSetup(int _id, int _fps, int _width, int _height) {
 //--------------------------------------------------------------
 void ofApp::update() {
     timestamp = getTimestamp();
-    newFrameToProcess = false;
-    
-    if (usePiCam) {
-        frame = cam.grab();
-        if (!frame.empty()) {
-            toOf(frame, gray.getPixelsRef());           
+    newFrameToProcess = true;
+    ofBackground(0);
+       
+    //if (usePiCam) {
+        frame_first = cam.grab();
+        if (!frame_first.empty()) {
+            toOf(frame_first, piCamTarget.getPixelsRef());
             newFrameToProcess = true;
         }
-    } else if (useUsbCam) {
+    //} 
+    
+    if (useUsbCam) {
         camUsb.update();
         if (camUsb.isFrameNew()) {           
             //ofPixels tempPixels = camUsb.getPixelsRef();
-            gray.setFromPixels(camUsb.getPixelsRef());//tempPixels);
-            frame = toCv(gray);
+            camUsbTarget.setFromPixels(camUsb.getPixelsRef());//tempPixels);
             newFrameToProcess = true;
         }
-    } else if (useMjpegIn) {
+    } 
+    
+    if (useMjpegIn) {
         camIp.update();
         if (camIp.isFrameNew()) {
             //ofPixels tempPixels = camIp.getPixels();
-            gray.setFromPixels(camIp.getPixels());//tempPixels);
-            frame = toCv(gray);
+            mjpegInTarget.setFromPixels(camIp.getPixels());//tempPixels);
             newFrameToProcess = true;
         }
     }
+    
+    if (newFrameToProcess) {
+        targetBlendFbo.begin();
+        // OF_BLENDMODE_DISABLED, OF_BLENDMODE_ALPHA, OF_BLENDMODE_ADD, 
+        // OF_BLENDMODE_SUBTRACT, OF_BLENDMODE_MULTIPLY, OF_BLENDMODE_SCREEN
+        ofBackground(0);
+        ofEnableBlendMode(OF_BLENDMODE_SCREEN); 
+        if (usePiCam) piCamTarget.draw(0,0);  
+        if (useUsbCam) camUsbTarget.draw(0,0);
+        if (useMjpegIn) mjpegInTarget.draw(0,0);
+        targetBlendFbo.end();
 
-    if (newFrameToProcess && mjpegOutDirect) {
-        //std::cout << ("Sending direct") << endl;
-        if (sendMjpeg) streamServer.send(gray.getPixels());
-        
-        if (syncVideo) {
-            grayThumbnail.setFromPixels(gray.getPixels());
-            grayThumbnail.resize(thumbWidth, thumbHeight);
-            imageToBuffer(grayThumbnail, videoBuffer, syncVideoQuality);
+        targetBlendFbo.readToPixels(targetBlendPixels);
+        gray.setFromPixels(targetBlendPixels);
+        frame = toCv(gray);
 
-            if (sendOsc) sendOscVideo(sender, hostName, sessionId, videoBuffer, timestamp);
-            if (sendWs) sendWsVideo(wsServer, hostName, sessionId, videoBuffer, timestamp);
+        if (mjpegOutDirect) {
+            //std::cout << ("Sending direct") << endl;
+            if (sendMjpeg) streamServer.send(gray.getPixels());
+            
+            if (syncVideo) {
+                grayThumbnail.setFromPixels(gray.getPixels());
+                grayThumbnail.resize(thumbWidth, thumbHeight);
+                imageToBuffer(grayThumbnail, videoBuffer, syncVideoQuality);
+
+                if (sendOsc) sendOscVideo(sender, hostName, sessionId, videoBuffer, timestamp);
+                if (sendWs) sendWsVideo(wsServer, hostName, sessionId, videoBuffer, timestamp);
+            }
         }
     }
 }

@@ -87,7 +87,12 @@ class ofApp : public ofBaseApp {
 		
 		string mjpegUrl;
 		int camUsbId;
-		cv::Mat frame, frameProcessed;
+		cv::Mat frame_first, frame, frameProcessed;
+		
+		ofFbo targetBlendFbo;
+		ofPixels targetBlendPixels;
+		ofImage piCamTarget, camUsbTarget, mjpegInTarget;
+		
 		ofImage gray;
 		ofImage grayThumbnail;
 		int syncVideoQuality; // 5 best to 1 worst, default 3 medium
