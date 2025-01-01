@@ -167,7 +167,7 @@ void ofApp::draw() {
         planeFbo.begin();
 
         shader.begin();
-        shader.setUniformTexture("tex0", remoteIpImage.getTexture(), 1);
+        shader.setUniformTexture("tex0", remoteIpImage.getTexture(), 0);
         
         if (useLocalIpGrabber) {
             shader.setUniformTexture("tex1", localIpImage.getTexture(), 1);
