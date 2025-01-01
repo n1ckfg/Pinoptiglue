@@ -202,7 +202,7 @@ void ofApp::grabberSetup(int _id, int _fps, int _width, int _height) {
 //--------------------------------------------------------------
 void ofApp::update() {
     timestamp = getTimestamp();
-    newFrameToProcess = false;
+    //newFrameToProcess = false;
     ofBackground(0);
        
     if (usePiCam) {
@@ -213,7 +213,7 @@ void ofApp::update() {
             } else {
                 toOf(frame_first, piCamTarget.getPixelsRef());                
             }
-            newFrameToProcess = true;
+            //newFrameToProcess = true;
         }
     } 
     
@@ -225,7 +225,7 @@ void ofApp::update() {
             } else {
                 camUsbTarget.setFromPixels(camUsb.getPixelsRef());                
             }                     
-            newFrameToProcess = true;
+            //newFrameToProcess = true;
         }
     } 
     
@@ -237,11 +237,11 @@ void ofApp::update() {
             } else {
                 mjpegInTarget.setFromPixels(camIp.getPixels());;               
             }  
-            newFrameToProcess = true;
+            //newFrameToProcess = true;
         }
     }
     
-    if (newFrameToProcess) {
+    if (//newFrameToProcess) {
         if (camMode == CamMode::Combo) {
             targetBlendFbo.begin();
             ofEnableBlendMode(OF_BLENDMODE_ALPHA); 
@@ -282,7 +282,7 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    if(newFrameToProcess) {
+    if(//newFrameToProcess) {
         screenFbo.begin();
         ofBackground(0);
         

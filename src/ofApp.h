@@ -79,7 +79,7 @@ class ofApp : public ofBaseApp {
 		bool useUsbCam;
 		bool useMjpegIn;
 		bool mjpegOutDirect;
-		bool newFrameToProcess;
+		//bool newFrameToProcess;
 
 		ofxCvPiCam cam;
 		ofVideoGrabber camUsb;
