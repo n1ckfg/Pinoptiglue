@@ -132,7 +132,7 @@ void ofApp::setup() {
     cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
     cout << "Shader: " << shaderName << endl;
     cout << "MJPEG in: " << mjpegUrl << endl;
-    cout << "MJPEG local: " << useLocalIpGrabber << endl;
+    cout << "MJPEG local: " << useLocalIpGrabber << " " << localMjpegUrl << endl;
     cout << "MJPEG out: " << "http://" << hostName << ".local:" << streamPort << "/ipvideo" << endl;
     cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
 }
@@ -167,10 +167,10 @@ void ofApp::draw() {
         planeFbo.begin();
 
         shader.begin();
-        shader.setUniformTexture("tex0", remoteIpImage.getTexture(), 0);
+        shader.setUniformTexture("tex0", remoteIpImage.getTexture(), 1);
         
         if (useLocalIpGrabber) {
-            shader.setUniformTexture("tex1", localIpImage.getTexture(), 1);
+            shader.setUniformTexture("tex1", localIpImage.getTexture(), 2);
         }
         
         ofPushMatrix();
