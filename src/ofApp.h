@@ -79,7 +79,7 @@ class ofApp : public ofBaseApp {
 		ofx::Video::IPVideoGrabber remoteIpGrabber, localIpGrabber;
 		bool useLocalIpGrabber;
 		
-		string mjpegUrl;
+		string mjpegUrl, localMjpegUrl;
 		cv::Mat frame_first, frame, frameProcessed;
 				
 		ofImage gray;

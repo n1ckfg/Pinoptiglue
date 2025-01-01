@@ -52,6 +52,7 @@ void ofApp::setup() {
     stillCompression = settings.getValue("settings:still_compression", 100);
     
     mjpegUrl = settings.getValue("settings:mjpeg_url", "http://nfg-rpi-3-4.local:7111/ipvideo");
+    localMjpegUrl = "http://127.0.0.1:" + localStreamPort + "/ipvideo";
 
     // camera
     if (videoColor) {
@@ -112,7 +113,7 @@ void ofApp::setup() {
     remoteIpGrabber.connect();
 
     if (useLocalIpGrabber) {
-        localIpGrabber.setURI("http://127.0.0.1:" + localStreamPort + "/ipvideo");
+        localIpGrabber.setURI(localMjpegUrl);
         localIpGrabber.connect();
     }
 
