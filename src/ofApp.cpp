@@ -187,7 +187,7 @@ void ofApp::draw() {
         planeFbo.end();
 
         // * * * * * * *
-        gray.setFromPixels(planeFbo.getPixels());;
+        gray.setFromPixels(planeFbo.readToPixels());;
         frame = toCv(gray);
         // * * * * * * *
 
