@@ -56,15 +56,9 @@ void ofApp::setup() {
     if (videoColor) {
         gray.allocate(width, height, OF_IMAGE_COLOR);
         grayThumbnail.allocate(width, height, OF_IMAGE_COLOR);
-		piCamTarget.allocate(width, height, OF_IMAGE_COLOR);
-        camUsbTarget.allocate(width, height, OF_IMAGE_COLOR);
-        mjpegInTarget.allocate(width, height, OF_IMAGE_COLOR);
     } else {
         gray.allocate(width, height, OF_IMAGE_GRAYSCALE);        
-        grayThumbnail.allocate(width, height, OF_IMAGE_GRAYSCALE);     
-		piCamTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);
-        camUsbTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);
-        mjpegInTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);           
+        grayThumbnail.allocate(width, height, OF_IMAGE_GRAYSCALE);        
     }
         
     camIp.setURI(mjpegUrl);
@@ -78,9 +72,6 @@ void ofApp::setup() {
     ofSystem("cp /etc/hostname " + ofToDataPath("DocumentRoot/js/"));
     hostName = getHostName();
     
-    targetBlendFbo.allocate(width, height, GL_RGBA);
-    targetBlendPixels.allocate(width, height, OF_IMAGE_COLOR);
-
     screenFbo.allocate(width, height, GL_RGBA);
     screenPixels.allocate(width, height, OF_IMAGE_COLOR);
     //fbo.allocate(width, height, GL_RGBA);

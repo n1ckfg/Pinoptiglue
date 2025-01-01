@@ -78,11 +78,7 @@ class ofApp : public ofBaseApp {
 		
 		string mjpegUrl;
 		cv::Mat frame_first, frame, frameProcessed;
-		
-		ofFbo targetBlendFbo;
-		ofPixels targetBlendPixels;
-		ofImage mjpegInTarget;
-		
+				
 		ofImage gray;
 		ofImage grayThumbnail;
 		int syncVideoQuality; // 5 best to 1 worst, default 3 medium
