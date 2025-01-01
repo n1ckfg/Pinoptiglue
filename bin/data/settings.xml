@@ -12,7 +12,7 @@
     <debug>1</debug>
     <!-- * -->
     <mjpeg_url>http://nfg-rpi-3-4.local:7111/ipvideo</mjpeg_url>
-    <mjpeg_url_2>http://nfg-rpi-3-4.local:7111/ipvideo</mjpeg_url_2>
+    <mjpeg_url_2>http://127.0.0.1:7114/ipvideo</mjpeg_url_2>
     <use_ip_grabber_2>1</use_ip_grabber_2>
     <!-- * -->
     <still_compression>100</still_compression>
