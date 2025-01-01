@@ -2,7 +2,6 @@
 
 #include "ofMain.h"
 #include "ofxCv.h"
-#include "ofxCvPiCam.h"
 #include "ofxOsc.h"
 #include "ofxXmlSettings.h"
 #include "ofxHTTP.h"
@@ -30,8 +29,6 @@ class ofApp : public ofBaseApp {
 		ofFile file;
 		ofxXmlSettings settings;
 
-		//ofPixels pixels;
-		int rpiCamVersion; // 0 for not an RPi cam, 1, 2, or 3
 		string lastPhotoTakenName;
 		int stillCompression;
 		int timestamp;
@@ -75,18 +72,11 @@ class ofApp : public ofBaseApp {
 		ofFbo screenFbo;
 		ofPixels screenPixels;
 		
-		bool usePiCam;
-		bool useUsbCam;
-		bool useMjpegIn;
-		bool mjpegOutDirect;
 		//bool newFrameToProcess;
 
-		ofxCvPiCam cam;
-		ofVideoGrabber camUsb;
 		ofx::Video::IPVideoGrabber camIp;
 		
 		string mjpegUrl;
-		int camUsbId;
 		cv::Mat frame_first, frame, frameProcessed;
 		
 		ofFbo targetBlendFbo;
