@@ -241,7 +241,7 @@ void ofApp::update() {
         }
     }
     
-    if (//newFrameToProcess) {
+    //if (newFrameToProcess) {
         if (camMode == CamMode::Combo) {
             targetBlendFbo.begin();
             ofEnableBlendMode(OF_BLENDMODE_ALPHA); 
@@ -277,12 +277,12 @@ void ofApp::update() {
                 if (sendWs) sendWsVideo(wsServer, hostName, sessionId, videoBuffer, timestamp);
             }
         }
-    }
+    //}
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    if(//newFrameToProcess) {
+    //if(newFrameToProcess) {
         screenFbo.begin();
         ofBackground(0);
         
@@ -419,7 +419,7 @@ void ofApp::draw() {
                 if (sendWs) sendWsVideo(wsServer, hostName, sessionId, videoBuffer, timestamp);            
             }
         }
-    }
+    //}
        
     if (debug) {
         screenFbo.draw(0,0);
