@@ -70,10 +70,10 @@ class ofApp : public ofBaseApp {
 		ofBuffer contourPointsBuffer;
 	
 		ofFbo planeFbo, screenFbo;
-		ofPixels screenPixels;
+		ofPixels planePixels, screenPixels;
 		
 		ofImage remoteIpImage, localIpImage;
-		
+
 		bool newFrameToProcess;
 
 		ofx::Video::IPVideoGrabber remoteIpGrabber, localIpGrabber;

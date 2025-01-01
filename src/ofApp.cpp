@@ -72,9 +72,8 @@ void ofApp::setup() {
     
     planeFbo.allocate(width, height, GL_RGBA);
     screenFbo.allocate(width, height, GL_RGBA);
+    planePixels.allocate(width, height, OF_IMAGE_COLOR);
     screenPixels.allocate(width, height, OF_IMAGE_COLOR);
-    //fbo.allocate(width, height, GL_RGBA);
-    //pixels.allocate(width, height, OF_IMAGE_COLOR);
         
     thresholdValue = settings.getValue("settings:threshold", 127); 
     contourThreshold = 2.0;
@@ -187,7 +186,8 @@ void ofApp::draw() {
         planeFbo.end();
 
         // * * * * * * *
-        gray.setFromPixels(planeFbo.readToPixels());;
+        planeFbo.readToPixels(planePixels);
+        gray.setFromPixels(planePixels);
         frame = toCv(gray);
         // * * * * * * *
 
