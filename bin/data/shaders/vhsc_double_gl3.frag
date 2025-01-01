@@ -26,7 +26,7 @@ vec3 adjustGamma(vec3 color, float gamma) {
 
 void main() {
     vec2 uv = varyingtexcoord;
-    uv.y *= -1.0;
+    uv.y = abs(uv.y - 1.0);
     
     vec3 centerColor = texture(tex0, uv).xyz + texture(tex1, uv).xyz;   
     vec3 leftColor = texture(tex1, uv - vec2(texelSize.x, 0.0)).xyz;
