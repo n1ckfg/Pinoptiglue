@@ -5,7 +5,6 @@
     <stream_port>7111</stream_port>
     <ws_port>7112</ws_port>
     <post_port>7113</post_port>
-    <local_stream_port>7114</local_stream_port>
     <!-- * -->
     <app_framerate>60</app_framerate>
     <width>640</width>
