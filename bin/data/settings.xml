@@ -8,14 +8,12 @@
     <local_stream_port>7114</local_stream_port>
     <!-- * -->
     <app_framerate>60</app_framerate>
-    <cam_framerate>30</cam_framerate>
-    <cam_rotation>0</cam_rotation>
     <width>640</width>
     <height>480</height>
     <debug>1</debug>
     <!-- * -->
     <mjpeg_url>http://nfg-rpi-3-4.local:7111/ipvideo</mjpeg_url>
-    <use_local_ip_grabber>0</use_local_ip_grabber>
+    <use_local_ip_grabber>1</use_local_ip_grabber>
     <!-- * -->
     <still_compression>100</still_compression>
     <!-- * -->
@@ -39,7 +37,7 @@
     <max_stream_framerate>30</max_stream_framerate>
     <max_stream_queue>1</max_stream_queue>
     <!-- * -->
-    <shader_name>displacement</shader_name>
+    <shader_name>vhsc_double</shader_name>
     <plane_res_x>128</plane_res_x>
     <plane_res_y>64</plane_res_y>
     <wireframe>0</wireframe>

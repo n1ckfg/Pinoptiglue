@@ -16,7 +16,6 @@ void ofApp::setup() {
     ofHideCursor();
 
     appFramerate = settings.getValue("settings:app_framerate", 60);
-    camFramerate = settings.getValue("settings:cam_framerate", 30);
     ofSetFrameRate(appFramerate);
 
     syncVideoQuality = settings.getValue("settings:osc_video_quality", 3); 
@@ -169,7 +168,10 @@ void ofApp::draw() {
 
         shader.begin();
         shader.setUniformTexture("tex0", remoteIpImage.getTexture(), 1);
-        shader.setUniformTexture("tex1", localIpImage.getTexture(), 2);
+        
+        if (useLocalIpGrabber) {
+            shader.setUniformTexture("tex1", localIpImage.getTexture(), 2);
+        }
         
         ofPushMatrix();
         ofTranslate(width/2, height/2);

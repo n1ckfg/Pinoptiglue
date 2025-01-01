@@ -18,7 +18,7 @@ class ofApp : public ofBaseApp {
 		void update();
 		void draw();
 			
-		int width, height, appFramerate, camFramerate;
+		int width, height, appFramerate;
 		int thumbWidth, thumbHeight;
 		string sessionId, hostName; 
 		string oscHost;
