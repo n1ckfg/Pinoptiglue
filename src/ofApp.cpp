@@ -276,7 +276,7 @@ void ofApp::draw() {
         screenFbo.draw(0,0);
 
         stringstream info;
-        info << cam.width << "x" << cam.height << " @ "<< ofGetFrameRate() <<"fps"<< "\n";
+        info << width << "x" << height << " @ "<< ofGetFrameRate() <<"fps"<< "\n";
         ofDrawBitmapStringHighlight(info.str(), 10, 10, ofColor::black, ofColor::yellow);
     }
 }
