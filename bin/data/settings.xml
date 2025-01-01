@@ -13,9 +13,9 @@
     <height>480</height>
     <debug>1</debug>
     <!-- * -->
-    <use_pi_cam>1</use_pi_cam>
+    <use_pi_cam>0</use_pi_cam>
     <use_usb_cam>0</use_usb_cam>
-    <use_mjpeg_in>0</use_mjpeg_in>
+    <use_mjpeg_in>1</use_mjpeg_in>
     <mjpeg_url>http://nfg-rpi-3-4.local:7111/ipvideo</mjpeg_url>
     <!-- * -->
     <cam_usb_id>0</cam_usb_id>

@@ -111,14 +111,42 @@ void ofApp::setup() {
     shaderName = settings.getValue("settings:shader_name", "displacement"); 
     doWireframe = (bool) settings.getValue("settings:wireframe", 0);
 
-    ipImage.allocate(width, height, OF_IMAGE_COLOR);
-    ipGrabber.setURI(mjpegUrl);
-    ipGrabber.connect();
+    if (usePiCam) {
+        piCamTarget.allocate(width, height, OF_IMAGE_COLOR);
 
-    if (useIpGrabber2) {
-        ipImage2.allocate(width, height, OF_IMAGE_COLOR);
-        ipGrabber2.setURI(mjpegUrl2);
-        ipGrabber2.connect();
+        cam.setup(width, height, camFramerate, videoColor); // color/gray;
+
+        camRotation = settings.getValue("settings:cam_rotation", 0); 
+        camSharpness = settings.getValue("settings:sharpness", 0); 
+        camContrast = settings.getValue("settings:contrast", 0); 
+        camBrightness = settings.getValue("settings:brightness", 50); 
+        camIso = settings.getValue("settings:iso", 300); 
+        camExposureMode = settings.getValue("settings:exposure_mode", 0); 
+        camExposureCompensation = settings.getValue("settings:exposure_compensation", 0); 
+        camShutterSpeed = settings.getValue("settings:shutter_speed", 0);
+
+        cam.setRotation(camRotation);
+        cam.setSharpness(camSharpness);
+        cam.setContrast(camContrast);
+        cam.setBrightness(camBrightness);
+        cam.setISO(camIso);
+        cam.setExposureMode((MMAL_PARAM_EXPOSUREMODE_T) camExposureMode);
+        cam.setExposureCompensation(camExposureCompensation);
+        cam.setShutterSpeed(camShutterSpeed);
+        //cam.setFrameRate // not implemented in ofxCvPiCam 
+    }
+
+    if (useUsbCam) {       
+        camUsbTarget.allocate(width, height, OF_IMAGE_COLOR);
+
+        grabberSetup(camUsbId, camFramerate, width, height);   
+    }
+
+    if (useMjpegIn) {       
+        mjpegInTarget.allocate(width, height, OF_IMAGE_COLOR);
+
+        ipGrabber.setURI(mjpegUrl);
+        ipGrabber.connect();
     }
 
 #ifdef TARGET_OPENGLES
@@ -152,13 +180,13 @@ void ofApp::update() {
     if (ipGrabber.isFrameNew()) {
         //gray.setFromPixels(ipGrabber.getPixels());;
         //frame = toCv(gray);
-        ipImage.setFromPixels(ipGrabber.getPixels());
+        mjpegInTarget.setFromPixels(ipGrabber.getPixels());
         //newFrameToProcess = true;
     }
 
     if (useIpGrabber2) {
         if (ipGrabber2.isFrameNew()) {
-            ipImage2.setFromPixels(ipGrabber2.getPixels());
+            mjpegInTarget2.setFromPixels(ipGrabber2.getPixels());
             //newFrameToProcess = true;
         }
     }
@@ -172,10 +200,10 @@ void ofApp::draw() {
         planeFbo.begin();
 
         shader.begin();
-        shader.setUniformTexture("tex0", ipImage.getTexture(), 1);
+        shader.setUniformTexture("tex0", mjpegInTarget.getTexture(), 1);
         
         if (useIpGrabber2) {
-            shader.setUniformTexture("tex1", ipImage2.getTexture(), 2);
+            shader.setUniformTexture("tex1", mjpegInTarget2.getTexture(), 2);
         }
         
         ofPushMatrix();
