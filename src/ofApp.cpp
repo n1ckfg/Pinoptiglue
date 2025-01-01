@@ -107,10 +107,12 @@ void ofApp::setup() {
     shaderName = settings.getValue("settings:shader_name", "displacement"); 
     doWireframe = (bool) settings.getValue("settings:wireframe", 0);
 
+    ipImage.allocate(width, height, OF_IMAGE_COLOR);
     ipGrabber.setURI(mjpegUrl);
     ipGrabber.connect();
 
     if (useIpGrabber2) {
+        ipImage2.allocate(width, height, OF_IMAGE_COLOR);
         ipGrabber2.setURI(mjpegUrl2);
         ipGrabber2.connect();
     }
