@@ -170,7 +170,7 @@ void ofApp::draw() {
         shader.setUniformTexture("tex0", remoteIpImage.getTexture(), 1);
         
         if (useLocalIpGrabber) {
-            shader.setUniformTexture("tex1", localIpImage.getTexture(), 2);
+            shader.setUniformTexture("tex1", localIpImage.getTexture(), 1);
         }
         
         ofPushMatrix();
