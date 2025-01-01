@@ -115,6 +115,8 @@ void ofApp::setup() {
 #else
     if (ofIsGLProgrammableRenderer()) {
         shader.load("shaders/" + shaderName + "_gl3");
+    } else {
+        shader.load("shaders/" + shaderName + "_gl2");        
     }
 #endif
 
@@ -267,8 +269,10 @@ void ofApp::draw() {
         planeFbo.end();
 
         screenFbo.begin();
-        planeFbo.getTextureReference().bind();
+        //planeFbo.getTextureReference().bind();
         shader.begin();
+        shader.setUniformTexture("tex0", planeFbo.getTextureReference(), 1);
+        
         ofPushMatrix();
         ofTranslate(width/2, height/2);
         ofScale(1.0, -1.0, 1.0);
@@ -281,7 +285,7 @@ void ofApp::draw() {
 
         ofPopMatrix();
         shader.end();
-        planeFbo.getTextureReference().unbind();
+        //planeFbo.getTextureReference().unbind();
         screenFbo.end();
 
         if (sendMjpeg || syncVideo) {           
