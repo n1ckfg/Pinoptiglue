@@ -134,4 +134,6 @@ class ofApp : public ofBaseApp {
 
 		void grabberSetup(int _id, int _fps, int _width, int _height);
 
+		int sourceCounter;
+
 };
