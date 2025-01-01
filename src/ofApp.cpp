@@ -47,6 +47,7 @@ void ofApp::setup() {
     streamPort = settings.getValue("settings:stream_port", 7111);
     wsPort = settings.getValue("settings:ws_port", 7112);
     postPort = settings.getValue("settings:post_port", 7113);
+    localStreamPort = settings.getValue("settings:local_stream_port", 7114);
 
     stillCompression = settings.getValue("settings:still_compression", 100);
     
@@ -61,9 +62,6 @@ void ofApp::setup() {
         grayThumbnail.allocate(width, height, OF_IMAGE_GRAYSCALE);        
     }
         
-    camIp.setURI(mjpegUrl);
-    camIp.connect();
-    
     // ~ ~ ~   get a persistent name for this computer   ~ ~ ~
     // a randomly generated id
     sessionId = getSessionId();
@@ -109,6 +107,15 @@ void ofApp::setup() {
     planeResY = settings.getValue("settings:plane_res_y", 64); 
     shaderName = settings.getValue("settings:shader_name", "displacement"); 
     doWireframe = (bool) settings.getValue("settings:wireframe", 0);
+    useLocalIpGrabber = (bool) settings.getValue("settings:use_local_ip_grabber", 0);
+
+    remoteIpGrabber.setURI(mjpegUrl);
+    remoteIpGrabber.connect();
+
+    if (useLocalIpGrabber) {
+        localIpGrabber.setURI("http://127.0.0.1:" + localStreamPort + "/ipvideo");
+        localIpGrabber.connect();
+    }
 
 #ifdef TARGET_OPENGLES
     shader.load("shaders/" + shaderName + "_es3");
@@ -126,6 +133,7 @@ void ofApp::setup() {
     cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
     cout << "Shader: " << shaderName << endl;
     cout << "MJPEG in: " << mjpegUrl << endl;
+    cout << "MJPEG local: " << useLocalIpGrabber << endl;
     cout << "MJPEG out: " << "http://" << hostName << ".local:" << streamPort << "/ipvideo" << endl;
     cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
 }
@@ -136,20 +144,55 @@ void ofApp::update() {
     newFrameToProcess = false;
     ofBackground(0);
     
-    camIp.update();
-    if (camIp.isFrameNew()) {
-        gray.setFromPixels(camIp.getPixels());;
-        frame = toCv(gray);
+    remoteIpGrabber.update();
+    if (remoteIpGrabber.isFrameNew()) {
+        //gray.setFromPixels(remoteIpGrabber.getPixels());;
+        //frame = toCv(gray);
+        remoteIpImage.setFromPixels(remoteIpGrabber.getPixels());
         newFrameToProcess = true;
+    }
+
+    if (useLocalIpGrabber) {
+        if (localIpGrabber.isFrameNew()) {
+            localIpImage.setFromPixels(localIpGrabber.getPixels());
+            newFrameToProcess = true;
+        }
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
     if(newFrameToProcess) {
-        planeFbo.begin();
         ofBackground(0);
+
+        planeFbo.begin();
+
+        shader.begin();
+        shader.setUniformTexture("tex0", remoteIpImage.getTexture(), 1);
+        shader.setUniformTexture("tex1", localIpImage.getTexture(), 2);
         
+        ofPushMatrix();
+        ofTranslate(width/2, height/2);
+        ofScale(1.0, -1.0, 1.0);
+
+        if (doWireframe) {
+            plane.drawWireframe();
+        } else {
+            plane.draw();
+        }
+
+        ofPopMatrix();
+        shader.end();
+
+        planeFbo.end();
+
+        // * * * * * * *
+        gray.setFromPixels(planeFbo.getPixels());;
+        frame = toCv(gray);
+        // * * * * * * *
+
+        screenFbo.begin();
+
         if (debug) {
             if (!blobs && !contours) {
                 drawMat(frame, 0, 0);
@@ -266,26 +309,6 @@ void ofApp::draw() {
             if (sendWs) sendWsPixel(wsServer, hostName, sessionId, maxBrightnessX, maxBrightnessY, timestamp);
         }
         
-        planeFbo.end();
-
-        screenFbo.begin();
-        //planeFbo.getTextureReference().bind();
-        shader.begin();
-        shader.setUniformTexture("tex0", planeFbo.getTextureReference(), 1);
-        
-        ofPushMatrix();
-        ofTranslate(width/2, height/2);
-        ofScale(1.0, -1.0, 1.0);
-
-        if (doWireframe) {
-            plane.drawWireframe();
-        } else {
-            plane.draw();
-        }
-
-        ofPopMatrix();
-        shader.end();
-        //planeFbo.getTextureReference().unbind();
         screenFbo.end();
 
         if (sendMjpeg || syncVideo) {           

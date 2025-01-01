@@ -22,7 +22,7 @@ class ofApp : public ofBaseApp {
 		int thumbWidth, thumbHeight;
 		string sessionId, hostName; 
 		string oscHost;
-		int oscPort, streamPort, wsPort, postPort;
+		int oscPort, streamPort, wsPort, postPort, localStreamPort;
 
 		bool debug; // draw to local screen, default true
 
@@ -72,9 +72,12 @@ class ofApp : public ofBaseApp {
 		ofFbo planeFbo, screenFbo;
 		ofPixels screenPixels;
 		
+		ofImage remoteIpImage, localIpImage;
+		
 		bool newFrameToProcess;
 
-		ofx::Video::IPVideoGrabber camIp;
+		ofx::Video::IPVideoGrabber remoteIpGrabber, localIpGrabber;
+		bool useLocalIpGrabber;
 		
 		string mjpegUrl;
 		cv::Mat frame_first, frame, frameProcessed;

@@ -5,6 +5,7 @@
     <stream_port>7111</stream_port>
     <ws_port>7112</ws_port>
     <post_port>7113</post_port>
+    <local_stream_port>7114</local_stream_port>
     <!-- * -->
     <app_framerate>60</app_framerate>
     <cam_framerate>30</cam_framerate>
@@ -14,6 +15,7 @@
     <debug>1</debug>
     <!-- * -->
     <mjpeg_url>http://nfg-rpi-3-4.local:7111/ipvideo</mjpeg_url>
+    <use_local_ip_grabber>0</use_local_ip_grabber>
     <!-- * -->
     <still_compression>100</still_compression>
     <!-- * -->
