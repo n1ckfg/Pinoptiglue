@@ -46,12 +46,12 @@ void ofApp::setup() {
     streamPort = settings.getValue("settings:stream_port", 7111);
     wsPort = settings.getValue("settings:ws_port", 7112);
     postPort = settings.getValue("settings:post_port", 7113);
-    localStreamPort = settings.getValue("settings:local_stream_port", 7114);
 
     stillCompression = settings.getValue("settings:still_compression", 100);
     
     mjpegUrl = settings.getValue("settings:mjpeg_url", "http://nfg-rpi-3-4.local:7111/ipvideo");
-    localMjpegUrl = "http://127.0.0.1:" + ofToString(localStreamPort) + "/ipvideo";
+    mjpegUrl2 = settings.getValue("settings:mjpeg_url2", "http://127.0.0.1:7114/ipvideo");
+    useIpGrabber2 = (bool) settings.getValue("settings:use_ip_grabber_2", 0);
 
     // camera
     if (videoColor) {
@@ -106,14 +106,13 @@ void ofApp::setup() {
     planeResY = settings.getValue("settings:plane_res_y", 64); 
     shaderName = settings.getValue("settings:shader_name", "displacement"); 
     doWireframe = (bool) settings.getValue("settings:wireframe", 0);
-    useLocalIpGrabber = (bool) settings.getValue("settings:use_local_ip_grabber", 0);
 
-    remoteIpGrabber.setURI(mjpegUrl);
-    remoteIpGrabber.connect();
+    ipGrabber.setURI(mjpegUrl);
+    ipGrabber.connect();
 
-    if (useLocalIpGrabber) {
-        localIpGrabber.setURI(localMjpegUrl);
-        localIpGrabber.connect();
+    if (useIpGrabber2) {
+        ipGrabber2.setURI(mjpegUrl2);
+        ipGrabber2.connect();
     }
 
 #ifdef TARGET_OPENGLES
@@ -131,8 +130,8 @@ void ofApp::setup() {
 
     cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
     cout << "Shader: " << shaderName << endl;
-    cout << "MJPEG in: " << mjpegUrl << endl;
-    cout << "MJPEG local: " << useLocalIpGrabber << " " << localMjpegUrl << endl;
+    cout << "MJPEG in 1: " << mjpegUrl << endl;
+    cout << "MJPEG in 2: " << useIpGrabber2 << " ... " << mjpegUrl2 << endl;
     cout << "MJPEG out: " << "http://" << hostName << ".local:" << streamPort << "/ipvideo" << endl;
     cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
 }
@@ -140,37 +139,37 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
     timestamp = getTimestamp();
-    newFrameToProcess = false;
+    //newFrameToProcess = false;
     ofBackground(0);
     
-    remoteIpGrabber.update();
-    if (remoteIpGrabber.isFrameNew()) {
-        //gray.setFromPixels(remoteIpGrabber.getPixels());;
+    ipGrabber.update();
+    if (ipGrabber.isFrameNew()) {
+        //gray.setFromPixels(ipGrabber.getPixels());;
         //frame = toCv(gray);
-        remoteIpImage.setFromPixels(remoteIpGrabber.getPixels());
-        newFrameToProcess = true;
+        ipImage.setFromPixels(ipGrabber.getPixels());
+        //newFrameToProcess = true;
     }
 
-    if (useLocalIpGrabber) {
-        if (localIpGrabber.isFrameNew()) {
-            localIpImage.setFromPixels(localIpGrabber.getPixels());
-            newFrameToProcess = true;
+    if (useIpGrabber2) {
+        if (ipGrabber2.isFrameNew()) {
+            ipImage2.setFromPixels(ipGrabber2.getPixels());
+            //newFrameToProcess = true;
         }
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    if(newFrameToProcess) {
+    //if(newFrameToProcess) {
         ofBackground(0);
 
         planeFbo.begin();
 
         shader.begin();
-        shader.setUniformTexture("tex0", remoteIpImage.getTexture(), 1);
+        shader.setUniformTexture("tex0", ipImage.getTexture(), 1);
         
-        if (useLocalIpGrabber) {
-            shader.setUniformTexture("tex1", localIpImage.getTexture(), 2);
+        if (useIpGrabber2) {
+            shader.setUniformTexture("tex1", ipImage2.getTexture(), 2);
         }
         
         ofPushMatrix();
@@ -327,7 +326,7 @@ void ofApp::draw() {
                 if (sendWs) sendWsVideo(wsServer, hostName, sessionId, videoBuffer, timestamp);            
             }
         }
-    }
+    //}
        
     if (debug) {
         screenFbo.draw(0,0);
