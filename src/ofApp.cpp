@@ -230,11 +230,11 @@ void ofApp::draw() {
 
     shader.begin();
 
-    if (mjpegIn) shader.setUniformTexture("tex0", mjpegInTarget.getTexture(), 1);
+    if (useMjpegIn) shader.setUniformTexture("tex0", mjpegInTarget.getTexture(), 1);
 
     if (usePiCam) shader.setUniformTexture("tex1", piCamTarget.getTexture(), 2);
     
-    if (useUsbCam) shader.setUniformTexture("tex2", usbCamTarget.getTexture(), 3);
+    if (useUsbCam) shader.setUniformTexture("tex2", camUsbTarget.getTexture(), 3);
             
     ofPushMatrix();
     ofTranslate(width/2, height/2);
