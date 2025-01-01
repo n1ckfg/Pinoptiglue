@@ -16,6 +16,7 @@ void ofApp::setup() {
     ofHideCursor();
 
     appFramerate = settings.getValue("settings:app_framerate", 60);
+    camFramerate = settings.getValue("settings:cam_framerate", 30);
     ofSetFrameRate(appFramerate);
 
     syncVideoQuality = settings.getValue("settings:osc_video_quality", 3); 
@@ -47,11 +48,14 @@ void ofApp::setup() {
     wsPort = settings.getValue("settings:ws_port", 7112);
     postPort = settings.getValue("settings:post_port", 7113);
 
+    usePiCam = (bool) settings.getValue("settings:use_pi_cam", 1);
+    rpiCamVersion = settings.getValue("settings:rpi_cam_version", 2);
     stillCompression = settings.getValue("settings:still_compression", 100);
     
+    useUsbCam = (bool) settings.getValue("settings:use_usb_cam", 0);
+    camUsbId = settings.getValue("settings:cam_usb_id", 0);
+
     mjpegUrl = settings.getValue("settings:mjpeg_url", "http://nfg-rpi-3-4.local:7111/ipvideo");
-    mjpegUrl2 = settings.getValue("settings:mjpeg_url2", "http://127.0.0.1:7114/ipvideo");
-    useIpGrabber2 = (bool) settings.getValue("settings:use_ip_grabber_2", 0);
 
     // camera
     if (videoColor) {

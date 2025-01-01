@@ -7,14 +7,19 @@
     <post_port>7113</post_port>
     <!-- * -->
     <app_framerate>60</app_framerate>
+    <cam_framerate>30</cam_framerate>
+    <cam_rotation>0</cam_rotation>
     <width>640</width>
     <height>480</height>
     <debug>1</debug>
     <!-- * -->
+    <use_pi_cam>1</use_pi_cam>
+    <use_usb_cam>0</use_usb_cam>
+    <use_mjpeg_in>0</use_mjpeg_in>
     <mjpeg_url>http://nfg-rpi-3-4.local:7111/ipvideo</mjpeg_url>
-    <mjpeg_url_2>http://127.0.0.1:7114/ipvideo</mjpeg_url_2>
-    <use_ip_grabber_2>1</use_ip_grabber_2>
     <!-- * -->
+    <cam_usb_id>0</cam_usb_id>
+    <rpi_cam_version>2</rpi_cam_version>
     <still_compression>100</still_compression>
     <!-- * -->
     <send_osc>0</send_osc>
@@ -31,6 +36,13 @@
     <video_color>0</video_color>
     <contour_slices>10</contour_slices>
     <threshold>120</threshold>
+    <sharpness>50</sharpness>
+    <contrast>0</contrast>
+    <brightness>55</brightness>
+    <iso>800</iso>
+    <exposure_mode>0</exposure_mode>
+    <exposure_compensation>0</exposure_compensation>
+    <shutter_speed>100000</shutter_speed>
     <!-- * -->
     <max_stream_connections>5</max_stream_connections>
     <max_stream_bitrate>256</max_stream_bitrate>
