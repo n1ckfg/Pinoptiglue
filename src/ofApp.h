@@ -69,7 +69,7 @@ class ofApp : public ofBaseApp {
 		ofBuffer contourColorBuffer;
 		ofBuffer contourPointsBuffer;
 	
-		ofFbo screenFbo;
+		ofFbo planeFbo, screenFbo;
 		ofPixels screenPixels;
 		
 		bool newFrameToProcess;
@@ -100,15 +100,11 @@ class ofApp : public ofBaseApp {
 		int smooth;
 			
 		ofxCv::TrackingColorMode trackingColorMode; // RGB, HSV, H, HS; default RGB
-		void grabberSetup(int _id, int _fps, int _width, int _height);
-	
-		enum class CamMode {
-			PiOnly,
-			UsbOnly,
-			MjpegOnly,
-			Combo
-		};
-		
-		CamMode camMode;
-	
+
+        ofShader shader;
+        string shaderName;
+        ofPlanePrimitive plane;
+        int planeResX, planeResY;
+		bool doWireframe;
+
 };

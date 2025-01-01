@@ -36,4 +36,9 @@
     <max_stream_bitrate>256</max_stream_bitrate>
     <max_stream_framerate>30</max_stream_framerate>
     <max_stream_queue>1</max_stream_queue>
+    <!-- * -->
+    <shader_name>displacement</shader_name>
+    <plane_res_x>128</plane_res_x>
+    <plane_res_y>64</plane_res_y>
+    <wireframe>0</wireframe>
 </settings>

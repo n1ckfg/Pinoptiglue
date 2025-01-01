@@ -72,6 +72,7 @@ void ofApp::setup() {
     ofSystem("cp /etc/hostname " + ofToDataPath("DocumentRoot/js/"));
     hostName = getHostName();
     
+    planeFbo.allocate(width, height, GL_RGBA);
     screenFbo.allocate(width, height, GL_RGBA);
     screenPixels.allocate(width, height, OF_IMAGE_COLOR);
     //fbo.allocate(width, height, GL_RGBA);
@@ -104,7 +105,24 @@ void ofApp::setup() {
 
     setupOscSender(sender, oscHost, oscPort);
 
+    planeResX = settings.getValue("settings:plane_res_x", 128); 
+    planeResY = settings.getValue("settings:plane_res_y", 64); 
+    shaderName = settings.getValue("settings:shader_name", "displacement"); 
+    doWireframe = (bool) settings.getValue("settings:wireframe", 0);
+
+#ifdef TARGET_OPENGLES
+    shader.load("shaders/" + shaderName + "_es3");
+#else
+    if (ofIsGLProgrammableRenderer()) {
+        shader.load("shaders/" + shaderName + "_gl3");
+    }
+#endif
+
+    plane.set(width, height, planeResX, planeResY, OF_PRIMITIVE_TRIANGLES);
+    plane.mapTexCoordsFromTexture(planeFbo.getTextureReference());
+
     cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
+    cout << "Shader: " << shaderName << endl;
     cout << "MJPEG in: " << mjpegUrl << endl;
     cout << "MJPEG out: " << "http://" << hostName << ".local:" << streamPort << "/ipvideo" << endl;
     cout << "~ ~ ~ ~ ~ ~ ~ ~ ~ ~" << endl;
@@ -127,7 +145,7 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
     if(newFrameToProcess) {
-        screenFbo.begin();
+        planeFbo.begin();
         ofBackground(0);
         
         if (debug) {
@@ -246,6 +264,24 @@ void ofApp::draw() {
             if (sendWs) sendWsPixel(wsServer, hostName, sessionId, maxBrightnessX, maxBrightnessY, timestamp);
         }
         
+        planeFbo.end();
+
+        screenFbo.begin();
+        planeFbo.getTextureReference().bind();
+        shader.begin();
+        ofPushMatrix();
+        ofTranslate(width/2, height/2);
+        ofScale(1.0, -1.0, 1.0);
+
+        if (doWireframe) {
+            plane.drawWireframe();
+        } else {
+            plane.draw();
+        }
+
+        ofPopMatrix();
+        shader.end();
+        planeFbo.getTextureReference().unbind();
         screenFbo.end();
 
         if (sendMjpeg || syncVideo) {           
