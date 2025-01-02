@@ -116,7 +116,12 @@ void ofApp::setup() {
 
     if (usePiCam) {
         sourceCounter++;
-        piCamTarget.allocate(width, height, OF_IMAGE_COLOR);
+
+        if (videoColor) {
+            piCamTarget.allocate(width, height, OF_IMAGE_COLOR);
+        } else {
+            piCamTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);
+        }
 
         cam.setup(width, height, camFramerate, videoColor); // color/gray;
 
@@ -203,7 +208,8 @@ void ofApp::update() {
     if (usePiCam) {
         frame_first = cam.grab();
         if (!frame_first.empty()) {
-            toOf(frame_first, piCamTarget.getPixelsRef());                
+            //toOf(frame_first, piCamTarget.getPixelsRef());                
+            toOf(frame_first, piCamTarget);                
         }
     } 
     
