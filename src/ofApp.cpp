@@ -208,7 +208,8 @@ void ofApp::update() {
     if (usePiCam) {
         frame = cam.grab();
         if (!frame.empty()) {
-            toOf(frame, piCamTarget);                
+            toOf(frame, piCamTarget);   
+            piCamTarget.update();             
         }
     } 
     
