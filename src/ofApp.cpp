@@ -20,7 +20,7 @@ void ofApp::setup() {
     ofSetFrameRate(appFramerate);
 
     syncVideoQuality = settings.getValue("settings:osc_video_quality", 3); 
-    videoColor = (bool) settings.getValue("settings:video_color", 0); 
+    videoColor = (bool) settings.getValue("settings:video_color", 1); 
     
     width = settings.getValue("settings:width", 640);
     height = settings.getValue("settings:height", 480);
@@ -62,11 +62,11 @@ void ofApp::setup() {
 
     // camera
     if (videoColor) {
-        gray.allocate(width, height, OF_IMAGE_COLOR);
-        grayThumbnail.allocate(width, height, OF_IMAGE_COLOR);
+        mainImage.allocate(width, height, OF_IMAGE_COLOR);
+        mainImageThumbnail.allocate(width, height, OF_IMAGE_COLOR);
     } else {
-        gray.allocate(width, height, OF_IMAGE_GRAYSCALE);        
-        grayThumbnail.allocate(width, height, OF_IMAGE_GRAYSCALE);        
+        mainImage.allocate(width, height, OF_IMAGE_GRAYSCALE);        
+        mainImageThumbnail.allocate(width, height, OF_IMAGE_GRAYSCALE);        
     }
         
     // ~ ~ ~   get a persistent name for this computer   ~ ~ ~
@@ -123,7 +123,7 @@ void ofApp::setup() {
             piCamTarget.allocate(width, height, OF_IMAGE_GRAYSCALE);
         }
 
-        cam.setup(width, height, camFramerate, videoColor); // color/gray;
+        cam.setup(width, height, camFramerate, videoColor); // color/mainImage;
 
         camRotation = settings.getValue("settings:cam_rotation", 0); 
         camSharpness = settings.getValue("settings:sharpness", 0); 
@@ -206,10 +206,9 @@ void ofApp::update() {
     timestamp = getTimestamp();
     
     if (usePiCam) {
-        frame_first = cam.grab();
-        if (!frame_first.empty()) {
-            //toOf(frame_first, piCamTarget.getPixelsRef());                
-            toOf(frame_first, piCamTarget);                
+        frame = cam.grab();
+        if (!frame.empty()) {
+            toOf(frame, piCamTarget);                
         }
     } 
     
@@ -260,17 +259,17 @@ void ofApp::draw() {
 
     // * * * * * * *
     planeFbo.readToPixels(planePixels);
-    gray.setFromPixels(planePixels);
-    frame = toCv(gray);
+    mainImage.setFromPixels(planePixels);
+    frame2 = toCv(mainImage);
     // * * * * * * *
 
     screenFbo.begin();
 
     if (debug) {
         if (!blobs && !contours) {
-            drawMat(frame, 0, 0);
+            drawMat(frame2, 0, 0);
         } else if (blobs || contours) {
-            drawMat(frameProcessed, 0, 0);
+            drawMat(frame2Processed, 0, 0);
         }
     }
 
@@ -280,10 +279,10 @@ void ofApp::draw() {
         	ofNoFill();
         }
         
-        //autothreshold(frameProcessed);        
-        threshold(frame, frameProcessed, thresholdValue, 255, 0);
+        //autothreshold(frame2Processed);        
+        threshold(frame2, frame2Processed, thresholdValue, 255, 0);
         contourFinder.setThreshold(contourThreshold);    
-        contourFinder.findContours(frameProcessed);
+        contourFinder.findContours(frame2Processed);
 
         int n = contourFinder.size();
         for (int i = 0; i < n; i++) {
@@ -307,12 +306,12 @@ void ofApp::draw() {
         }
 
         int contourCounter = 0;
-        unsigned char * pixels = gray.getPixels().getData();
-        int gw = gray.getWidth();
+        unsigned char * pixels = mainImage.getPixels().getData();
+        int gw = mainImage.getWidth();
 
         for (int h=0; h<255; h += int(255/contourSlices)) {
             contourFinder.setThreshold(h);
-            contourFinder.findContours(frame);
+            contourFinder.findContours(frame2);
             if (debug) contourFinder.draw();            
 
             int n = contourFinder.size();
@@ -362,7 +361,7 @@ void ofApp::draw() {
 
         for (int y=0; y<height - skip; y += skip) {
             for (int x=0; x<width - skip; x += skip) {
-                ofColor colorAtXY = gray.getColor(x, y);
+                ofColor colorAtXY = mainImage.getColor(x, y);
                 float brightnessOfColorAtXY = colorAtXY.getBrightness();
                 if (brightnessOfColorAtXY > maxBrightness && brightnessOfColorAtXY > thresholdValue) {
                     maxBrightness = brightnessOfColorAtXY;
@@ -389,9 +388,9 @@ void ofApp::draw() {
         if (sendMjpeg) streamServer.send(screenPixels);
         
         if (syncVideo) {
-            grayThumbnail.setFromPixels(screenPixels);
-            grayThumbnail.resize(thumbWidth, thumbHeight);
-            imageToBuffer(grayThumbnail, videoBuffer, syncVideoQuality);
+            mainImageThumbnail.setFromPixels(screenPixels);
+            mainImageThumbnail.resize(thumbWidth, thumbHeight);
+            imageToBuffer(mainImageThumbnail, videoBuffer, syncVideoQuality);
 
             if (sendOsc) sendOscVideo(sender, hostName, sessionId, videoBuffer, timestamp);
             if (sendWs) sendWsVideo(wsServer, hostName, sessionId, videoBuffer, timestamp);            
@@ -508,7 +507,7 @@ void ofApp::createResultHtml(string fileName) {
 }
 
 void ofApp::takePhoto() {
-    ofSaveImage(gray, photoBuffer, OF_IMAGE_FORMAT_JPEG, OF_IMAGE_QUALITY_BEST);
+    ofSaveImage(mainImage, photoBuffer, OF_IMAGE_FORMAT_JPEG, OF_IMAGE_QUALITY_BEST);
     string fileName = "photo_" + ofToString(timestamp) + ".jpg";
     ofBufferToFile(ofToDataPath("DocumentRoot/photos/") + fileName, photoBuffer);
     createResultHtml(fileName);
@@ -519,7 +518,7 @@ void ofApp::takePhoto() {
 }
 
 void ofApp::streamPhoto() {
-    ofSaveImage(gray, photoBuffer, OF_IMAGE_FORMAT_JPEG, OF_IMAGE_QUALITY_BEST);
+    ofSaveImage(mainImage, photoBuffer, OF_IMAGE_FORMAT_JPEG, OF_IMAGE_QUALITY_BEST);
     //string fileName = "photo_" + ofToString(timestamp) + ".jpg";
     //ofBufferToFile(ofToDataPath("DocumentRoot/photos/") + fileName, photoBuffer);
     //createResultHtml(fileName);

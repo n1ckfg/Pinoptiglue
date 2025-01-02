@@ -88,10 +88,10 @@ class ofApp : public ofBaseApp {
 		
 		string mjpegUrl;
 		int camUsbId;
-		cv::Mat frame_first, frame, frameProcessed;
+		cv::Mat frame, frame2, frame2Processed;
 				
-		ofImage gray;
-		ofImage grayThumbnail;
+		ofImage mainImage;
+		ofImage mainImageThumbnail;
 		int syncVideoQuality; // 5 best to 1 worst, default 3 medium
 		bool videoColor;
 
