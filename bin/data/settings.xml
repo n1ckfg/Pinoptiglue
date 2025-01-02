@@ -13,8 +13,8 @@
     <height>480</height>
     <debug>1</debug>
     <!-- * -->
-    <use_pi_cam>0</use_pi_cam>
-    <use_usb_cam>0</use_usb_cam>
+    <use_pi_cam>1</use_pi_cam>
+    <use_usb_cam>1</use_usb_cam>
     <use_mjpeg_in>1</use_mjpeg_in>
     <mjpeg_url>http://nfg-rpi-3-4.local:7111/ipvideo</mjpeg_url>
     <!-- * -->
@@ -49,8 +49,8 @@
     <max_stream_framerate>30</max_stream_framerate>
     <max_stream_queue>1</max_stream_queue>
     <!-- * -->
-    <shader_name>vhsc_double</shader_name>
-    <plane_res_x>128</plane_res_x>
+    <shader_name>mixer</shader_name>
+    <plane_res_x>64</plane_res_x>
     <plane_res_y>64</plane_res_y>
     <wireframe>0</wireframe>
 </settings>
