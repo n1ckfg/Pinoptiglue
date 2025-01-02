@@ -203,7 +203,7 @@ void ofApp::update() {
     if (usePiCam) {
         frame_first = cam.grab();
         if (!frame_first.empty()) {
-            toOf(frame_first, piCamTarget.getPixelsRef());                
+            toOf(frame_first, piCamTarget);                
         }
     } 
     
