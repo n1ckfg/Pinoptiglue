@@ -10,8 +10,6 @@ const float gamma = 1.2;
 const vec2 texelSize = vec2(8.0, 8.0); //1.0/120.0, 1.0/90.0);
 const float posterizeLevels = 16.0; //90.0;
 
-const float kernel[5] = float[](0.10, 0.20, 0.40, 0.20, 0.10);
-
 float getLuminance(vec3 col) {
     return dot(col, vec3(0.299, 0.587, 0.114));
 }
@@ -25,6 +23,8 @@ vec3 adjustGamma(vec3 color, float gamma) {
 }
 
 void main() {
+    float kernel[5] = float[](0.10, 0.20, 0.40, 0.20, 0.10);
+
     vec2 uv = vec2(varyingtexcoord.x, 1.0 - varyingtexcoord.y);
     uv = abs(1.0 - uv);
     
