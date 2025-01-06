@@ -1,7 +1,3 @@
-#version 310 es
-
-precision mediump float;
-
 // these are for the programmable pipeline system and are passed in
 // by default from OpenFrameworks
 uniform mat4 modelViewMatrix;
