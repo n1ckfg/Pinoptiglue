@@ -9,7 +9,12 @@ varying vec2 varyingtexcoord;
 const float gamma = 1.2;
 const vec2 texelSize = vec2(8.0, 8.0); //1.0/120.0, 1.0/90.0);
 const float posterizeLevels = 16.0; //90.0;
-const float kernel[5] = float[5](0.10, 0.20, 0.40, 0.20, 0.10);
+
+const kernel0 = 0.10;
+const kernel1 = 0.20;
+const kernel2 = 0.40;
+const kernel3 = 0.20;
+const kernel4 = 0.10;
 
 float getLuminance(vec3 col) {
     return dot(col, vec3(0.299, 0.587, 0.114));
@@ -33,7 +38,7 @@ void main() {
     vec3 topColor = texture2D(tex1, uv + vec2(0.0, texelSize.y)).xyz;
     vec3 bottomColor = texture2D(tex2, uv - vec2(0.0, texelSize.y)).xyz;
 
-    vec3 blurredColor = topColor * kernel[0] + leftColor * kernel[1] + centerColor * kernel[2] + rightColor * kernel[3] + bottomColor * kernel[4];
+    vec3 blurredColor = topColor * kernel0 + leftColor * kernel1 + centerColor * kernel2 + rightColor * kernel3 + bottomColor * kernel4;
     vec3 sharpenedColor = blurredColor * 5.0 - (leftColor + rightColor + topColor + bottomColor);
     vec3 posterizedColor = floor(sharpenedColor * posterizeLevels) / posterizeLevels;
 
