@@ -23,7 +23,7 @@ vec3 adjustGamma(vec3 color, float gamma) {
 }
 
 void main() {
-    float kernel[5] = float[](0.10, 0.20, 0.40, 0.20, 0.10);
+    float kernel[5] = float[5](0.10, 0.20, 0.40, 0.20, 0.10);
 
     vec2 uv = vec2(varyingtexcoord.x, 1.0 - varyingtexcoord.y);
     uv = abs(1.0 - uv);
