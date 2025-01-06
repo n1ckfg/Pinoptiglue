@@ -10,11 +10,11 @@ const float gamma = 1.2;
 const vec2 texelSize = vec2(8.0, 8.0); //1.0/120.0, 1.0/90.0);
 const float posterizeLevels = 16.0; //90.0;
 
-const kernel0 = 0.10;
-const kernel1 = 0.20;
-const kernel2 = 0.40;
-const kernel3 = 0.20;
-const kernel4 = 0.10;
+const float kernel0 = 0.10;
+const float kernel1 = 0.20;
+const float kernel2 = 0.40;
+const float kernel3 = 0.20;
+const float kernel4 = 0.10;
 
 float getLuminance(vec3 col) {
     return dot(col, vec3(0.299, 0.587, 0.114));
