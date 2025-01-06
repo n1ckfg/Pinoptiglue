@@ -4,7 +4,7 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 
-varying vec2 varyingtexcoord;
+varying vec2 texCoordVarying;
 
 const float gamma = 1.2;
 const vec2 texelSize = vec2(8.0, 8.0); //1.0/120.0, 1.0/90.0);
@@ -29,7 +29,7 @@ vec3 adjustGamma(vec3 color, float gamma) {
 }
 
 void main() {
-    vec2 uv = vec2(varyingtexcoord.x, 1.0 - varyingtexcoord.y);
+    vec2 uv = vec2(texCoordVarying.x, 1.0 - texCoordVarying.y);
     uv = abs(1.0 - uv);
     
     vec3 centerColor = texture2D(tex0, uv).xyz;   
