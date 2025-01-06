@@ -4,8 +4,7 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 
-in vec2 varyingtexcoord;
-out vec4 outputColor;
+varying vec2 varyingtexcoord;
 
 const float gamma = 1.2;
 const vec2 texelSize = vec2(8.0, 8.0); //1.0/120.0, 1.0/90.0);
@@ -39,5 +38,5 @@ void main() {
     vec3 sharpenedColor = blurredColor * 5.0 - (leftColor + rightColor + topColor + bottomColor);
     vec3 posterizedColor = floor(sharpenedColor * posterizeLevels) / posterizeLevels;
 
-    outputColor = vec4(posterizedColor, 1.0);
+    gl_FragColor = vec4(posterizedColor, 1.0);
 }
