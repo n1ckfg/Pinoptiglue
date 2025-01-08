@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <settings>
-    <osc_host>BrazilV.local</osc_host>
+    <osc_host>Example.local</osc_host>
     <osc_port>7110</osc_port>
     <stream_port>7111</stream_port>
     <ws_port>7112</ws_port>
@@ -14,9 +14,9 @@
     <debug>1</debug>
     <!-- * -->
     <use_pi_cam>1</use_pi_cam>
-    <use_usb_cam>1</use_usb_cam>
-    <use_mjpeg_in>1</use_mjpeg_in>
-    <mjpeg_url>http://nfg-rpi-3-4.local:7111/ipvideo</mjpeg_url>
+    <use_usb_cam>0</use_usb_cam>
+    <use_mjpeg_in>0</use_mjpeg_in>
+    <mjpeg_url>http://example.local:7111/ipvideo</mjpeg_url>
     <!-- * -->
     <cam_usb_id>0</cam_usb_id>
     <rpi_cam_version>2</rpi_cam_version>

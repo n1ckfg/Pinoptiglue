@@ -32,7 +32,7 @@ void main() {
     vec2 uv = vec2(texCoordVarying.x, 1.0 - texCoordVarying.y);
     uv = abs(1.0 - uv);
     
-    vec3 centerColor = texture2D(tex0, uv).xyz;   
+    vec3 centerColor = texture2D(tex2, uv).xyz;   
     vec3 leftColor = texture2D(tex1, uv - vec2(texelSize.x, 0.0)).xyz;
     vec3 rightColor = texture2D(tex2, uv + vec2(texelSize.x, 0.0)).xyz;
     vec3 topColor = texture2D(tex1, uv + vec2(0.0, texelSize.y)).xyz;
