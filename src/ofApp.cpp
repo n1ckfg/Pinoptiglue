@@ -265,6 +265,7 @@ void ofApp::draw() {
     // * * * * * * *
 
     screenFbo.begin();
+    ofBackground(0);
 
     if (debug) {
         if (!blobs && !contours) {
@@ -313,14 +314,17 @@ void ofApp::draw() {
         for (int h=0; h<255; h += int(255/contourSlices)) {
             contourFinder.setThreshold(h);
             contourFinder.findContours(frame2);
-            if (debug) contourFinder.draw();            
+            //if (debug) contourFinder.draw();            
 
             int n = contourFinder.size();
             for (int i = 0; i < n; i++) {
                 ofPolyline line = contourFinder.getPolyline(i);
                 line.simplify(simplify);
                 line = line.getSmoothed(smooth, 0.5);
-                vector<glm::vec3> cvPoints = line.getVertices();
+                line.setClosed(false);
+                if (debug) line.draw();
+
+		vector<glm::vec3> cvPoints = line.getVertices();
 
                 int x = int(cvPoints[0].x);
                 int y = int(cvPoints[0].y);
